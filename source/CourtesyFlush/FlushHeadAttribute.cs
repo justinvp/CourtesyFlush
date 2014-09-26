@@ -3,6 +3,7 @@ using System.Web.Mvc;
 
 namespace CourtesyFlush
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public class FlushHeadAttribute : ActionFilterAttribute
     {
         public string Title { get; set; }
@@ -21,6 +22,14 @@ namespace CourtesyFlush
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            bool bypassFlushHead = filterContext.ActionDescriptor.IsDefined(typeof(BypassFlushHeadAttribute), inherit: true)
+                                   || filterContext.ActionDescriptor.ControllerDescriptor.IsDefined(typeof(BypassFlushHeadAttribute), inherit: true);
+
+            if (bypassFlushHead)
+            {
+                return;
+            }
+
             var controller = filterContext.Controller;
 
             if (_viewDataFunction != null)
